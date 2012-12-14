@@ -13,7 +13,7 @@
 // Number of encoder counts for gap size
 #define GATE_GAP_COUNT      25
 // Absolute distance to end to be run slowly
-#define GATE_SLOW_COUNT     500
+#define GATE_SLOW_COUNT     600
 
 
 
