@@ -17,7 +17,7 @@ void Button1PressEvent(void)
 
 void Button1HoldEvent(void)
 {
-    GateLearnToggle();
+    //GateLearnToggle();
 }
 
 void Button2PressEvent(void)
