@@ -70,9 +70,6 @@ void QEIInterruptHandler(void)
     // Trigger callback if count reached, check handle is valid before trying
     if ((TriggerHandle != NULL) && (EncoderCount == EncoderTriggerCount))
     {
-        asm("nop");
-        asm("nop");
-        asm("nop");
         (*TriggerHandle)();
     }
 
