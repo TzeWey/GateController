@@ -126,7 +126,7 @@ void MotorTick(void)
             }
             else
             {
-                if (TickGet() - MotorIdleTimestamp >= GateSettings.MotorIdleDelayTimeout)
+                if (TickGet() - MotorIdleTimestamp >= GateStatus.MotorIdleDelayTimeout)
                 {
                     ADCStop();
                     HSPWMEnable(0);
@@ -140,10 +140,10 @@ void MotorTick(void)
             MotorIdleTimeout = 0;
             
             // ADC OC Check
-            if (ADCGetCurrent() > GateSettings.MotorOverCurrentADCValue)
+            if (ADCGetCurrent() > GateStatus.MotorOverCurrentADCValue)
             {
                 // Motor has OCed, slow things down
-                TargetPWM = GateSettings.MotorOverCurrentPWM;
+                TargetPWM = GateStatus.MotorOverCurrentPWM;
                 MotorIsOC = 1;
                 LEDY = 1;
                 MotorLastOCTimestamp = TickGet();
