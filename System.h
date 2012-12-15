@@ -8,8 +8,6 @@
 
 #include "DataEE16.h"
 
-#include "SystemParameters.h"
-
 // System Functions
 void   SystemInit(void);
 UINT32 MemReadLatch(UINT8 page, UINT16 addrLo);
