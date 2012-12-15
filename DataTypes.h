@@ -167,6 +167,7 @@ typedef union
 typedef union
 {
     INT32 Val;
+    UINT32 Data;
     struct __PACKED
     {
         UINT16 W0;
