@@ -92,7 +92,7 @@ void GateUpdateStateDelayResume(void)
 
 void GateErrorClear(void)
 {
-    //GateStatus.GateStatusErrorFlag = 0;
+    GateStatus.GateStatusErrorFlag = 0;
 }
 
 static volatile DWORD GateJamLastWindowTick   = 0;
@@ -136,6 +136,8 @@ void GateJamTick(void)
 
 void GateMakeGap(void)
 {
+    // Set current position as zero for correct gap size
+    QEIEncoderCountReset();
     GateUpdateStateDelay(GATE_STATE_MAKE_GAP, GateStatus.GateGapStopDelay);
 }
 
