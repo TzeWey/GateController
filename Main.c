@@ -17,24 +17,24 @@ DWORD ErrorLastTick = 0;
 
 void Button1PressEvent(void)
 {
-    MotorStop();    
-}
-
-void Button1HoldEvent(void)
-{
-    GateLearnToggle();
-}
-
-void Button2PressEvent(void)
-{
     GateToggle();
     //MotorSetPWM(1000);
 }
 
-void Button3PressEvent(void)
+void Button2PressEvent(void)
 {
     //MotorSetPWM(8000);
     GateCalibrateClose();
+}
+
+void Button3PressEvent(void)
+{
+    GateLearnToggle();
+}
+
+void Button3HoldEvent(void)
+{
+    MotorStop();
 }
 
 int main(void)
@@ -47,10 +47,10 @@ int main(void)
     GateInit();
 
     // Register Button Event handlers
-    ButtonRegButtonPressHandle(&Button1, &Button1PressEvent);
-    ButtonRegButtonHoldHandle (&Button1, &Button1HoldEvent);
+    ButtonRegButtonPressHandle(&Button1, &Button1PressEvent);    
     ButtonRegButtonPressHandle(&Button2, &Button2PressEvent);
     ButtonRegButtonPressHandle(&Button3, &Button3PressEvent);
+    ButtonRegButtonHoldHandle (&Button3, &Button3HoldEvent);
 
     while (1)
     {
