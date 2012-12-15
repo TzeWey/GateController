@@ -45,11 +45,11 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/GateApplication.o ${OBJECTDIR}/Device.o ${OBJECTDIR}/Motor.o ${OBJECTDIR}/Encoder.o ${OBJECTDIR}/Button.o ${OBJECTDIR}/Framework.o ${OBJECTDIR}/Peripheral.o ${OBJECTDIR}/HSPWM.o ${OBJECTDIR}/QEI.o ${OBJECTDIR}/ADC.o ${OBJECTDIR}/Tick.o ${OBJECTDIR}/DataEE16.o ${OBJECTDIR}/DataEE16ASM.o ${OBJECTDIR}/System.o ${OBJECTDIR}/Main.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/GateApplication.o.d ${OBJECTDIR}/Device.o.d ${OBJECTDIR}/Motor.o.d ${OBJECTDIR}/Encoder.o.d ${OBJECTDIR}/Button.o.d ${OBJECTDIR}/Framework.o.d ${OBJECTDIR}/Peripheral.o.d ${OBJECTDIR}/HSPWM.o.d ${OBJECTDIR}/QEI.o.d ${OBJECTDIR}/ADC.o.d ${OBJECTDIR}/Tick.o.d ${OBJECTDIR}/DataEE16.o.d ${OBJECTDIR}/DataEE16ASM.o.d ${OBJECTDIR}/System.o.d ${OBJECTDIR}/Main.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/GateApplication.o ${OBJECTDIR}/Device.o ${OBJECTDIR}/Motor.o ${OBJECTDIR}/Encoder.o ${OBJECTDIR}/Button.o ${OBJECTDIR}/Framework.o ${OBJECTDIR}/Peripheral.o ${OBJECTDIR}/HSPWM.o ${OBJECTDIR}/QEI.o ${OBJECTDIR}/ADC.o ${OBJECTDIR}/Tick.o ${OBJECTDIR}/DataEE16.o ${OBJECTDIR}/DataEE16ASM.o ${OBJECTDIR}/System.o ${OBJECTDIR}/Main.o ${OBJECTDIR}/GateFunctions.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/GateApplication.o.d ${OBJECTDIR}/Device.o.d ${OBJECTDIR}/Motor.o.d ${OBJECTDIR}/Encoder.o.d ${OBJECTDIR}/Button.o.d ${OBJECTDIR}/Framework.o.d ${OBJECTDIR}/Peripheral.o.d ${OBJECTDIR}/HSPWM.o.d ${OBJECTDIR}/QEI.o.d ${OBJECTDIR}/ADC.o.d ${OBJECTDIR}/Tick.o.d ${OBJECTDIR}/DataEE16.o.d ${OBJECTDIR}/DataEE16ASM.o.d ${OBJECTDIR}/System.o.d ${OBJECTDIR}/Main.o.d ${OBJECTDIR}/GateFunctions.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/GateApplication.o ${OBJECTDIR}/Device.o ${OBJECTDIR}/Motor.o ${OBJECTDIR}/Encoder.o ${OBJECTDIR}/Button.o ${OBJECTDIR}/Framework.o ${OBJECTDIR}/Peripheral.o ${OBJECTDIR}/HSPWM.o ${OBJECTDIR}/QEI.o ${OBJECTDIR}/ADC.o ${OBJECTDIR}/Tick.o ${OBJECTDIR}/DataEE16.o ${OBJECTDIR}/DataEE16ASM.o ${OBJECTDIR}/System.o ${OBJECTDIR}/Main.o
+OBJECTFILES=${OBJECTDIR}/GateApplication.o ${OBJECTDIR}/Device.o ${OBJECTDIR}/Motor.o ${OBJECTDIR}/Encoder.o ${OBJECTDIR}/Button.o ${OBJECTDIR}/Framework.o ${OBJECTDIR}/Peripheral.o ${OBJECTDIR}/HSPWM.o ${OBJECTDIR}/QEI.o ${OBJECTDIR}/ADC.o ${OBJECTDIR}/Tick.o ${OBJECTDIR}/DataEE16.o ${OBJECTDIR}/DataEE16ASM.o ${OBJECTDIR}/System.o ${OBJECTDIR}/Main.o ${OBJECTDIR}/GateFunctions.o
 
 
 CFLAGS=
@@ -157,6 +157,12 @@ ${OBJECTDIR}/Main.o: Main.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE)  Main.c  -o ${OBJECTDIR}/Main.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Main.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -merrata=all -msmart-io=1 -Wall -msfr-warn=off
 	@${FIXDEPS} "${OBJECTDIR}/Main.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
+${OBJECTDIR}/GateFunctions.o: GateFunctions.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/GateFunctions.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  GateFunctions.c  -o ${OBJECTDIR}/GateFunctions.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/GateFunctions.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -merrata=all -msmart-io=1 -Wall -msfr-warn=off
+	@${FIXDEPS} "${OBJECTDIR}/GateFunctions.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 else
 ${OBJECTDIR}/GateApplication.o: GateApplication.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
@@ -241,6 +247,12 @@ ${OBJECTDIR}/Main.o: Main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/Main.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  Main.c  -o ${OBJECTDIR}/Main.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Main.o.d"        -g -omf=elf -O0 -merrata=all -msmart-io=1 -Wall -msfr-warn=off
 	@${FIXDEPS} "${OBJECTDIR}/Main.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/GateFunctions.o: GateFunctions.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/GateFunctions.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  GateFunctions.c  -o ${OBJECTDIR}/GateFunctions.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/GateFunctions.o.d"        -g -omf=elf -O0 -merrata=all -msmart-io=1 -Wall -msfr-warn=off
+	@${FIXDEPS} "${OBJECTDIR}/GateFunctions.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 
