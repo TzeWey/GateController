@@ -23,6 +23,7 @@ void GateMove(GATE_MOVE_DIR dir, GATE_MOVE_SPEED speed, INT32 trigger)
     switch (dir)
     {
     case OPEN:
+        GateStatus.GateStatusDirection = OPEN;
         if (speed == FAST)
         {
             MotorSetPWM(GateStatus.GateSpeedFast); //GateStatus.GateSpeedFast);
@@ -36,6 +37,7 @@ void GateMove(GATE_MOVE_DIR dir, GATE_MOVE_SPEED speed, INT32 trigger)
         break;
 
     case CLOSE:
+        GateStatus.GateStatusDirection = CLOSE;
         if (speed == FAST)
         {
             MotorSetPWM(-(GateStatus.GateSpeedFast)); //GateStatus.GateSpeedFast);
@@ -131,6 +133,25 @@ void GateJamTick(void)
         // Gate is not moving, reset jam detect window
         GateJamLastEncoderValue  = QEIEncoderCountGet();
         GateJamLastWindowTick    = TickGet();
+    }
+}
+
+void GateDirectionCheck(void)
+{
+    if (GateStatus.GateStatusIsMoving)
+    {
+        if ((GateStatus.GateStatusDirection == OPEN)&&(QEIEncoderCountGet() > GateStatus.GateOpenEncoderCount))
+        {
+            // Gate is supposed to be opening and
+            // appears to have passed opening limit, go slow and relearn
+            GateUpdateState(GATE_STATE_LEARNING_OPEN);
+        }
+        else if ((GateStatus.GateStatusDirection == CLOSE)&&(QEIEncoderCountGet() < 0))
+        {
+            // Gate is supposed to be closing and
+            // appears to have passed closing limit, go slow and relearn
+            GateUpdateState(GATE_STATE_CALIBRATING_CLOSE);
+        }
     }
 }
 

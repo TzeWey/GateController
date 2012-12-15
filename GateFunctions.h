@@ -56,6 +56,7 @@ typedef struct
 
     BYTE   GateStatusIsMoving;
     
+    GATE_MOVE_DIR   GateStatusDirection;
     GATE_MOVE_SPEED GateStatusSpeed;
 
     GATE_STATE      CurrentState;
@@ -81,6 +82,7 @@ void GateErrorClear(void);
 void GateJamRegEventHandle(void (*func)(void));
 void GateJamTick(void);
 
+void GateDirectionCheck(void);
 void GateMakeGap(void);
 void GateLearningStart(void);
 void GateLearningSetOpen(void);

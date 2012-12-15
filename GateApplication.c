@@ -195,6 +195,9 @@ void GateTick(void)
 {   
     GateJamTick();
 
+    // Catch encoder errors
+    GateDirectionCheck();
+
     switch (GateStatus.CurrentState)
     {
     case GATE_STATE_OPEN:
