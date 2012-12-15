@@ -48,7 +48,6 @@ void EncoderInit(void)
 
 void EncoderInterrupt(void)
 {
-    LEDY ^= 1;
 
     // Increment or decrement encoder
     if (EncoderDir == 1)

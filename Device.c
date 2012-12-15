@@ -5,12 +5,12 @@
 void DeviceInit(void)
 {
     MotorInit();
-    EncoderInit();
+    //EncoderInit();
 }
 
 void DeviceTick(void)
 {
     MotorTick();
-    EncoderTick();
+    //EncoderTick();
 }
 

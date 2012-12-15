@@ -3,12 +3,9 @@
 
 #include "GateFunctions.h"
 
-BYTE GateIsError(void);
-
-void GateMakeGap(void);
-
 void GateLearnToggle(void);
 void GateToggle(void);
+void GateCalibrateClose(void);
 
 void GateInit(void);
 void GateTick(void);

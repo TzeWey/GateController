@@ -57,7 +57,7 @@ void MotorSetPWM(INT16 pwm)
 void MotorTick(void)
 {
     // Motor Smooth Ramping
-    if ((TickGet() - MotorLastSpeedTick) > TICK_SECOND / 125)
+    if ((TickGet() - MotorLastSpeedTick) > GateStatus.MotorSmoothRampRate)
     {
         if (MotorPWM != TargetPWM)
         {
@@ -143,9 +143,16 @@ void MotorTick(void)
             if (ADCGetCurrent() > GateStatus.MotorOverCurrentADCValue)
             {
                 // Motor has OCed, slow things down
-                TargetPWM = GateStatus.MotorOverCurrentPWM;
+                if (SetPWM < 0)
+                {
+                    TargetPWM = -(GateStatus.MotorOverCurrentPWM);
+                }
+                else
+                {
+                    TargetPWM = GateStatus.MotorOverCurrentPWM;
+                }
+                
                 MotorIsOC = 1;
-                LEDY = 1;
                 MotorLastOCTimestamp = TickGet();
             }
             else
@@ -154,7 +161,6 @@ void MotorTick(void)
                 {
                     // OC has not occured for some time, restore speed and clear OC
                     MotorIsOC = 0;
-                    LEDY = 0;
                     TargetPWM = SetPWM;
                 }
             }

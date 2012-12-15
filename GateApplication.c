@@ -1,93 +1,13 @@
 #include "GateApplication.h"
 
-static volatile DWORD GateJamLastWindowTick   = 0;
-static volatile INT32 GateJamLastEncoderValue = 0;
+static volatile DWORD GateDelayBeginTimestamp = 0;
 
-
-static volatile BYTE  GateMakeGapFlag  = 0;
-static volatile DWORD GateMakeGapDelay = 0;
-
-typedef enum
+static void GateJammedEvent(void)
 {
-    GATE_STATE_OPEN  = 0,
-    GATE_STATE_CLOSE = 1,
-    GATE_STATE_STOP  = 2,
-    GATE_STATE_OPENING,
-    GATE_STATE_CLOSING,    
-    GATE_STATE_CALIBRATING_CLOSE,
-    GATE_STATE_LEARNING_CLOSE,
-    GATE_STATE_LEARNING_OPEN,    
-    GATE_STATE_MAKE_GAP,
-} GATE_STATE;
-
-static volatile GATE_STATE CurrentState  = GATE_STATE_STOP;
-static volatile GATE_STATE PreviousState = GATE_STATE_STOP;
-
-static void GateStartLearning(void);
-static void GateLearningSetOpen(void);
-
-static void GateUpdateState(GATE_STATE newState)
-{
-    PreviousState = CurrentState;
-    CurrentState  = newState;
-
-    // Indicate new state
-    GateStatus.GateStatusNewState = 1;
-}
-static void GateErrorClear(void)
-{
-    GateStatus.GateStatusErrorFlag = 0;
-}
-
-static void GateJamTick(void)
-{
-    if (GateStatus.GateStatusIsMoving)
-    {
-        // Gate is moving, check for jam
-        if ((TickGet() - GateJamLastWindowTick) > GateStatus.GateJamTimeoutWindow)
-        {
-            // Check if count has changed
-            INT32 EncoderDiff = QEIEncoderCountGet() - GateJamLastEncoderValue;
-
-            LEDY ^= 1;
-
-            if (((EncoderDiff <= 0) && (EncoderDiff > -GateStatus.GateJamMinimumEncoderChange)) || ((EncoderDiff > 0) && (EncoderDiff < GateStatus.GateJamMinimumEncoderChange)))
-            {
-
-                // Gate encoder count has not changed much, assume jammed
-                GateStatus.GateStatusErrorFlag = 1;
-                GateJammed();
-            }
-
-            // Save current encoder value
-            GateJamLastEncoderValue = QEIEncoderCountGet();
-            GateJamLastWindowTick = TickGet();
-        }
-    }
-    else
-    {
-        // Gate is not moving, reset jam detect window
-        GateJamLastEncoderValue  = QEIEncoderCountGet();
-        GateJamLastWindowTick = TickGet();
-    }
-}
-
-// TODO
-void GateMakeGap(void)
-{
+    // Since it appears to be jammed, stop quickly
     GateStopFast();
-    
-    GateMakeGapFlag = 1;
-    GateMakeGapDelay = TickGet();
-}
 
-// TODO
-static void GateJammed(void)
-{
-    // Since it appears to be jammed, stop
-    GateStopFast();
-    
-    switch (CurrentState)
+    switch (GateStatus.CurrentState)
     {
     case GATE_STATE_OPENING: // Was in the midst of opening
         // set gate as stopped, most probably the gate hit something
@@ -98,8 +18,7 @@ static void GateJammed(void)
         // Check if we are close to closing and adjust for CLOSE offset
         if (QEIEncoderCountGet() < GateStatus.GateJamCloseAutoOffsetDelta)
         {
-            // It appears to be very close to closed (possible) or has passed closed (should not be possible)
-            GateUpdateState(GATE_STATE_CALIBRATING_CLOSE);
+            // It appears to be very close to closed (possible) or has passed closed (should not be physically possible)
             GateMakeGap(); // Make gap, gap code should know what to do next
         }
         else
@@ -108,7 +27,7 @@ static void GateJammed(void)
             GateUpdateState(GATE_STATE_STOP);
         }
         break;
-        
+
     case GATE_STATE_CALIBRATING_CLOSE: // Was in the midst of calibrating close, this jam is expected
     case GATE_STATE_LEARNING_CLOSE: // Was in the midst of calibrating close, this jam is expected
         GateErrorClear();
@@ -120,78 +39,77 @@ static void GateJammed(void)
         GateLearningSetOpen();
         break;
 
+    case GATE_STATE_DELAY: // should not be able to trigger jam event as it is not moving
+        // Do nothing
+        break;
+
     default:
+        // All othee states
+        // GATE_STATE_OPEN, GATE_STATE_CLOSE, GATE_STATE_STOP (should not be able to cause jam events)
+        // GATE_STATE_MAKE_GAP, was making a gap, assuming the encoder had fallen off, the gate could have opened a little
         GateUpdateState(GATE_STATE_STOP);
         break;
     }
-
 }
-
-
-
 
 static void GateEncoderCountReachedEvent(void)
 {
-    // Count reached stop gate rapidly
-    GateStopFast();
-
-    switch (CurrentState)
+    switch (GateStatus.CurrentState)
     {
     case GATE_STATE_OPENING: // Was in the midst of opening
-        // set new state as open
+        // stop and set new state as open
+        GateStopFast();
         GateUpdateState(GATE_STATE_OPEN);
         break;
         
     case GATE_STATE_CLOSING: // Was in the midst of closing
-        // set new state as closed
+        // stop and set new state as closed
+        GateStopFast();
         GateUpdateState(GATE_STATE_CLOSE);
         break;
+
+    case GATE_STATE_MAKE_GAP: // Was making the close gap
+        // stop, and determine what to do next based on the previous state
+        GateStopFast();
         
-    case GATE_STATE_MAKE_GAP:
-        switch (PreviousState)
+        switch (GateStatus.PreviousState)
         {
+        case GATE_STATE_CLOSING:           // Was calibrating close
         case GATE_STATE_CALIBRATING_CLOSE: // Was calibrating close
             // set new state as closed and set current position as zero
             QEIEncoderCountReset();
-            GateUpdateState(GATE_STATE_CLOSE);           
+            GateUpdateState(GATE_STATE_CLOSE);
             break;
 
-        case GATE_STATE_LEARNING_CLOSE: // Was also calibrating close, but set to learn open size
+        case GATE_STATE_LEARNING_CLOSE: // Was also calibrating close, but was also set to learn opening size
             // set new state as learning open and set current position as zero
             QEIEncoderCountReset();
             GateUpdateState(GATE_STATE_LEARNING_OPEN);
-            GateSlow();
+            //GateSlow();
             break;
 
         default:
+            // Dont do anything else, but code should not reach here
             break;
-        }
+        }        
+        break;
 
     default:
+        // GATE_STATE_OPEN  ,should not be moving to cause this event
+        // GATE_STATE_CLOSE ,should not be moving to cause this event
+        // GATE_STATE_STOP  ,should not be moving to cause this event
+        // GATE_STATE_CALIBRATING_CLOSE, should be stopped by a jam event
+        // GATE_STATE_LEARNING_CLOSE, should be stopped by a jam event
+        // GATE_STATE_LEARNING_OPEN, should be stopped by a jam event
+        // GATE_STATE_DELAY ,should not be moving to cause this event
         break;
     }
 
 }
 
-static void GateStartLearning(void)
-{
-    GateUpdateState(GATE_STATE_LEARNING_CLOSE);
-    GateSlow();
-}
-
-static void GateLearningSetOpen(void)
-{
-    // Stop gate
-    GateStopFast();
-    // set current position as open limit
-    GateStatus.GateOpenEncoderCount = QEIEncoderCountGet();
-    // update state to Open
-    GateUpdateState(GATE_STATE_OPEN);
-}
-
 void GateLearnToggle(void)
 {
-    switch (CurrentState)
+    switch (GateStatus.CurrentState)
     {
     case GATE_STATE_LEARNING_OPEN: // It is trying to learn opening
         // set current position as open limit        
@@ -199,16 +117,16 @@ void GateLearnToggle(void)
         break;
 
     case GATE_STATE_LEARNING_CLOSE: // It is trying to learn closing
-        // start learning open, assume gate has reached end
+        // stop, set current position as zero, start learning open
         GateStopFast();
-        GateMakeGap();
+        QEIEncoderCountReset();
+        GateUpdateStateDelay(GATE_STATE_LEARNING_OPEN, GateStatus.GateGapStopDelay);
         break;
 
     default: // was in some other state, start learn more
-        GateStartLearning();
+        GateLearningStart();
         break;
     }
-    GateStartLearning();
 }
 
 void GateToggle(void)
@@ -216,10 +134,10 @@ void GateToggle(void)
     // Clear Error flags
     GateErrorClear();
     
-    switch (CurrentState)
+    switch (GateStatus.CurrentState)
     {
     case GATE_STATE_STOP: // It is Stopped
-        switch (PreviousState)
+        switch (GateStatus.PreviousState)
         {
         case GATE_STATE_OPENING: // It was last opening
             // so start closing
@@ -231,7 +149,7 @@ void GateToggle(void)
             GateUpdateState(GATE_STATE_OPENING);
             break;
 
-        default: // Initial state handler, this should only occur once at startup
+        default: // Initial state handler, this should only occur once at startup and occur when GATE_STATE_MAKE_GAP caused a jam event
             GateUpdateState(GATE_STATE_OPENING);
             break;
         }
@@ -261,30 +179,34 @@ void GateToggle(void)
         break;
 
     case GATE_STATE_MAKE_GAP:
+    case GATE_STATE_DELAY:
+        // Do nothing
         break;
 
     }
 }
 
-void GateInit(void)
+void GateCalibrateClose(void)
 {
-    // Initialize Gate Funtions which loads settigns
-    GateFunctionsInit();
-
-    QEIRegTriggerHandle(&GateEncoderCountReachedEvent);
+    GateUpdateState(GATE_STATE_CALIBRATING_CLOSE);
 }
 
 void GateTick(void)
-{
-    
+{   
     GateJamTick();
 
-    switch (CurrentState)
+    switch (GateStatus.CurrentState)
     {
-    case GATE_STATE_OPEN: // TODO : Currently doing nothing
+    case GATE_STATE_OPEN:
+        // Should be nothing to do as gate should already be stopped
         break;
         
-    case GATE_STATE_CLOSE: // TODO : Currently doing nothing, should reset encoder to zero
+    case GATE_STATE_CLOSE:
+        if (GateIsNewState())
+        {
+            // Reset encoder count to zero
+            QEIEncoderCountReset();
+        }
         break;
 
     case GATE_STATE_STOP:
@@ -295,7 +217,7 @@ void GateTick(void)
         }
         break;
 
-    case GATE_STATE_OPENING:
+    case GATE_STATE_OPENING:      
         if (GateIsNewState())
         {
             // Open gate, fast, to END
@@ -310,7 +232,7 @@ void GateTick(void)
         }
         break;
 
-    case GATE_STATE_CLOSING:
+    case GATE_STATE_CLOSING:        
         if (GateIsNewState())
         {
             // Stop gate
@@ -333,7 +255,7 @@ void GateTick(void)
         }
         break;
 
-    case GATE_STATE_LEARNING_CLOSE:
+    case GATE_STATE_LEARNING_CLOSE:        
         if (GateIsNewState())
         {
             // Close gate slowly
@@ -356,26 +278,32 @@ void GateTick(void)
             GateMove(OPEN, SLOW, GateStatus.GateGapEncoderCount);
         }
         break;
+
+    case GATE_STATE_DELAY: // This state should ONLY be accessed by using the GateUpdateStateDelay() function
+        if (GateIsNewState())
+        {
+            // Remember current timestamp
+            GateDelayBeginTimestamp = TickGet();
+        }
+        else
+        {
+            // Move to next state after predefined delay
+            if ((TickGet() - GateDelayBeginTimestamp) > GateStatus.NextStateDelay)
+            {
+                // Resume transition to new state
+                GateUpdateStateDelayResume();
+            }
+        }
+        break;
     }
 }
 
-void GateTick(void)
+void GateInit(void)
 {
+    // Initialize Gate Funtions which loads settigns
+    GateFunctionsInit();
 
-    // If Make gap
-    if (GateMakeGapFlag && ((TickGet() - GateMakeGapDelay) > GateStatus.GateGapStopDelay))
-    {
-        // Clear Flag
-        GateMakeGapFlag = 0;
-        
-        // Set current position as zero
-        QEIEncoderCountReset();
-        // Set new state
-        GateUpdateState(GATE_STATE_MAKE_GAP);
-        // Set trigger point
-        QEISetTrigger(GateStatus.GateGapEncoderCount);
-        // Move
-        GateSlow();
-    }
-
+    GateJamRegEventHandle(&GateJammedEvent);
+    
+    QEIRegTriggerHandle(&GateEncoderCountReachedEvent);
 }

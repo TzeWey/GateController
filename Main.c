@@ -17,24 +17,25 @@ DWORD ErrorLastTick = 0;
 
 void Button1PressEvent(void)
 {
-    MotorStop();
+    MotorStop();    
 }
 
 void Button1HoldEvent(void)
 {
-    //GateLearnToggle();
+    GateLearnToggle();
 }
 
 void Button2PressEvent(void)
 {
     GateToggle();
+    //MotorSetPWM(1000);
 }
 
 void Button3PressEvent(void)
 {
-    MotorSetPWM(3000);
+    //MotorSetPWM(8000);
+    GateCalibrateClose();
 }
-
 
 int main(void)
 {
@@ -76,9 +77,9 @@ int main(void)
         {
             LEDR = 0;
         }
-        
+
         // Clear Watchdog Timer
-        //ClrWdt();
+        ClrWdt();
     }
 
     return 0;
