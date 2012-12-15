@@ -140,17 +140,29 @@ void GateDirectionCheck(void)
 {
     if (GateStatus.GateStatusIsMoving)
     {
-        if ((GateStatus.GateStatusDirection == OPEN)&&(QEIEncoderCountGet() > GateStatus.GateOpenEncoderCount))
+        switch (GateStatus.CurrentState)
         {
-            // Gate is supposed to be opening and
-            // appears to have passed opening limit, go slow and relearn
-            GateUpdateState(GATE_STATE_LEARNING_OPEN);
-        }
-        else if ((GateStatus.GateStatusDirection == CLOSE)&&(QEIEncoderCountGet() < 0))
-        {
-            // Gate is supposed to be closing and
-            // appears to have passed closing limit, go slow and relearn
-            GateUpdateState(GATE_STATE_CALIBRATING_CLOSE);
+        case GATE_STATE_OPENING:
+            if (QEIEncoderCountGet() > GateStatus.GateOpenEncoderCount)
+            {
+                // Gate is supposed to be opening and
+                // appears to have passed opening limit, go slow and relearn
+                GateUpdateState(GATE_STATE_LEARNING_OPEN);
+            }
+            break;
+
+        case GATE_STATE_CLOSING:
+            if (QEIEncoderCountGet() < 0)
+            {
+                // Gate is supposed to be closing and
+                // appears to have passed closing limit, go slow and relearn
+                GateUpdateState(GATE_STATE_CALIBRATING_CLOSE);
+            }
+            break;
+
+        default:
+            // Ignore
+            break;
         }
     }
 }
