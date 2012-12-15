@@ -1,4 +1,0 @@
-GateController
-==============
-
-Not production code !!
