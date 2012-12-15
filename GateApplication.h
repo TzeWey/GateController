@@ -1,8 +1,7 @@
 #ifndef __GATEAPP_H
 #define __GATEAPP_H
 
-#include "Framework.h"
-#include "Device.h"
+#include "GateFunctions.h"
 
 BYTE GateIsError(void);
 
