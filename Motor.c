@@ -130,6 +130,8 @@ void MotorTick(void)
                 {
                     ADCStop();
                     HSPWMEnable(0);
+                    LEDY = 0;
+                    LEDG = 0;
                     MotorIdleTimeout = 0;
                 }
             }
