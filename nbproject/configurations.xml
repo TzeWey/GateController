@@ -6,6 +6,7 @@
                    projectFiles="true">
       <logicalFolder name="f1" displayName="Application" projectFiles="true">
         <itemPath>GateApplication.h</itemPath>
+        <itemPath>GateFunctions.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f5" displayName="Device" projectFiles="true">
         <itemPath>Device.h</itemPath>
@@ -33,7 +34,6 @@
           <itemPath>HardwareProfile.h</itemPath>
           <itemPath>Interrupts.h</itemPath>
           <itemPath>Oscillator.h</itemPath>
-          <itemPath>SystemParameters.h</itemPath>
         </logicalFolder>
         <logicalFolder name="f3" displayName="DataEE16" projectFiles="true">
           <itemPath>DataEE16.h</itemPath>
@@ -50,6 +50,7 @@
                    projectFiles="true">
       <logicalFolder name="f1" displayName="Application" projectFiles="true">
         <itemPath>GateApplication.c</itemPath>
+        <itemPath>GateFunctions.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="Device" projectFiles="true">
         <itemPath>Device.c</itemPath>
