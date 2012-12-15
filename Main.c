@@ -8,6 +8,7 @@
 #include "Device.h"
 
 #include "GateApplication.h"
+#include "GateFunctions.h"
 
 #include "Interrupts.h"
 
@@ -63,7 +64,7 @@ int main(void)
             StatusLastTick = TickGet();
         }
 
-        if (GateIsError())
+        if (GateStatus.GateStatusErrorFlag)
         {
             if ((TickGet() - ErrorLastTick) > (TICK_SECOND / 4))
             {
