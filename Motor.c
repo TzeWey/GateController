@@ -1,18 +1,20 @@
 #include "Framework.h"
 #include "Device.h"
 
-#define MOTOR_PWM_SCALE   10000
+#include "GateFunctions.h"
 
-#define PWMA        HSPWM5
-#define PWMB        HSPWM1
+#define MOTOR_PWM_SCALE     10000
+
+#define PWMA                HSPWM5
+#define PWMB                HSPWM1
 
 // Maximum and Minimum PWM value out of 10000
-#define MOTOR_MAX_PWM      8000
+#define MOTOR_MAX_PWM       8000
 #define MOTOR_MIN_PWM       250
 
 // Maximum Delta to zero before motor is considered to be stopped.
 // This is to eliminate close to Zero Duty as Gate Driver cannot drive zero PWM
-#define PWM_DIFF      100
+#define PWM_DIFF            100
 
 static volatile  INT16    SetPWM     = 0;
 static volatile  INT16 TargetPWM     = 0;
@@ -54,7 +56,8 @@ void MotorSetPWM(INT16 pwm)
 
 void MotorTick(void)
 {
-    if ((TickGet() - MotorLastSpeedTick) > TICK_SECOND / 150)
+    // Motor Smooth Ramping
+    if ((TickGet() - MotorLastSpeedTick) > TICK_SECOND / 125)
     {
         if (MotorPWM != TargetPWM)
         {
@@ -110,6 +113,7 @@ void MotorTick(void)
         MotorLastSpeedTick = TickGet();
     }
 
+    // Motor Idle PWM Shutdown
     if (HSPWMIsEnabled())
     {
         if (MotorPWM == 0)
@@ -122,7 +126,7 @@ void MotorTick(void)
             }
             else
             {
-                if (TickGet() - MotorIdleTimestamp >= MOTOR_IDLE_TIMEOUT)
+                if (TickGet() - MotorIdleTimestamp >= GateSettings.MotorIdleDelayTimeout)
                 {
                     ADCStop();
                     HSPWMEnable(0);
@@ -136,10 +140,10 @@ void MotorTick(void)
             MotorIdleTimeout = 0;
             
             // ADC OC Check
-            if (ADCGetCurrent() > ADC_OC_LIMIT)
+            if (ADCGetCurrent() > GateSettings.MotorOverCurrentADCValue)
             {
                 // Motor has OCed, slow things down
-                TargetPWM = MOTOR_OC_PWM;
+                TargetPWM = GateSettings.MotorOverCurrentPWM;
                 MotorIsOC = 1;
                 LEDY = 1;
                 MotorLastOCTimestamp = TickGet();
