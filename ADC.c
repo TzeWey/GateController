@@ -1,5 +1,8 @@
 #include "Peripheral.h"
 
+// Averaging Ring Buffer Size
+#define ADC_BUFFER_SIZE     16
+
 typedef struct
 {
     UINT16 Buffer[ADC_BUFFER_SIZE];
