@@ -13,7 +13,7 @@ void FrameworkInit(void)
 {
     // Button1 Setup
     ButtonInitHandle(&Button1, &BTN1Read);
-    ButtonSetTriggerType(&Button1, BUTTON_TRIGGER_TYPE_RELEASE_AND_HOLD);
+    ButtonSetTriggerType(&Button1, BUTTON_TRIGGER_TYPE_PRESS);
    
     // Button2 Setup
     ButtonInitHandle(&Button2, &BTN2Read);
@@ -21,7 +21,7 @@ void FrameworkInit(void)
 
     // Button3 Setup
     ButtonInitHandle(&Button3, &BTN3Read);
-    ButtonSetTriggerType(&Button3, BUTTON_TRIGGER_TYPE_PRESS);
+    ButtonSetTriggerType(&Button3, BUTTON_TRIGGER_TYPE_RELEASE_AND_HOLD);
 }
 
 void FrameworkTick(void)
