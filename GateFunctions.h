@@ -87,6 +87,8 @@ void GateMakeGap(void);
 void GateLearningStart(void);
 void GateLearningSetOpen(void);
 
+void GateSaveEncoderCount(void);
+
 void GateFunctionsInit(void);
 
 #endif

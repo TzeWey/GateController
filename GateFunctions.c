@@ -1,8 +1,38 @@
 #include "GateFunctions.h"
 
-#define GATE_MAX_COUNT      25000
+#define EE_ADDRESS_ENC_B0    0x00
+#define EE_ADDRESS_ENC_B1    0x01
+#define EE_ADDRESS_ENC_B2    0x02
+#define EE_ADDRESS_ENC_B3    0x03
 
 GATE_STATUS GateStatus;
+
+INT32_BIT INT32Value;
+
+void GateSaveEncoderCount(void)
+{
+    INT32Value.Val = GateStatus.GateOpenEncoderCount;
+    EEPROMWrite(EE_ADDRESS_ENC_B0, INT32Value.Byte.B0);
+    EEPROMWrite(EE_ADDRESS_ENC_B1, INT32Value.Byte.B1);
+    EEPROMWrite(EE_ADDRESS_ENC_B2, INT32Value.Byte.B2);
+    EEPROMWrite(EE_ADDRESS_ENC_B3, INT32Value.Byte.B3);
+}
+
+void GateLoadEncoderCount(void)
+{
+    INT32Value.Byte.B0 = EEPROMRead(EE_ADDRESS_ENC_B0);
+    INT32Value.Byte.B1 = EEPROMRead(EE_ADDRESS_ENC_B1);
+    INT32Value.Byte.B2 = EEPROMRead(EE_ADDRESS_ENC_B2);
+    INT32Value.Byte.B3 = EEPROMRead(EE_ADDRESS_ENC_B3);
+    if (INT32Value.Data == 0xFFFFFFFF)
+    {
+        GateStatus.GateOpenEncoderCount = 4000;
+    }
+    else
+    {
+        GateStatus.GateOpenEncoderCount = INT32Value.Val;
+    }
+}
 
 BYTE GateIsNewState(void)
 {
@@ -186,6 +216,8 @@ void GateLearningSetOpen(void)
     GateStatus.GateOpenEncoderCount = QEIEncoderCountGet();
     // update state to Open
     GateUpdateState(GATE_STATE_OPEN);
+    // Save value
+    GateSaveEncoderCount();
 }
 
 static void GateInitSettings(void)
@@ -235,6 +267,9 @@ static void GateInitSettings(void)
 
     GateStatus.CurrentState                   = GATE_STATE_STOP;
     GateStatus.PreviousState                  = GATE_STATE_STOP;
+
+    // Load encoder value
+    GateLoadEncoderCount();
 }
 
 void GateFunctionsInit(void)
